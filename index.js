@@ -31,7 +31,7 @@ app.post('/unlock', upload.single('file'), (req, res) => {
 
     const filePath = path.join(uploadDir, req.file.filename);
     const password = req.body.data;
-    
+
     console.log('Arquivo recebido:', req.file);
     console.log('Caminho do arquivo:', filePath);
 
@@ -49,13 +49,13 @@ app.post('/unlock', upload.single('file'), (req, res) => {
                 console.error(`Erro ao descriptografar o PDF: ${stderr}`);
                 return res.status(500).send('Falha ao descriptografar o PDF');
             }
-            
+
             if (stderr) {
                 console.error(`qpdf stderr: ${stderr}`);
             }
-            
+
             console.log(`qpdf stdout: ${stdout}`);
-            
+
             fs.access(decryptedFilePath, fs.constants.F_OK, (err) => {
                 if (err) {
                     console.error(`Arquivo descriptografado não encontrado: ${decryptedFilePath}`);
@@ -87,6 +87,10 @@ app.post('/unlock', upload.single('file'), (req, res) => {
             });
         });
     });
+});
+
+app.get('/', (req, res) => {
+    res.send('API de desbloqueio de PDF');
 });
 
 app.listen(port, () => {
