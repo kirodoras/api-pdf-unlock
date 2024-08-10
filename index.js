@@ -1,8 +1,12 @@
 import express from 'express';
 import multer from 'multer';
 import { exec } from 'child_process';
-import { join } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { existsSync, mkdirSync, access, constants, rename, unlink } from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 const port = 3000;
@@ -102,4 +106,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`API ouvindo na porta ${port}`);
 });
-
