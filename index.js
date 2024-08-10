@@ -1,17 +1,16 @@
-const express = require('express');
-const multer = require('multer');
-const { exec } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import express from 'express';
+import multer from 'multer';
+import { exec } from 'child_process';
+import { join } from 'path';
+import { existsSync, mkdirSync, access, constants, rename, unlink } from 'fs';
 
 const app = express();
 const port = 3000;
 
-// Configuração do multer para armazenamento em 'uploads/'
-const uploadDir = path.join(__dirname, 'uploads');
+const uploadDir = join(__dirname, 'uploads');
 
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+if (!existsSync(uploadDir)) {
+    mkdirSync(uploadDir);
 }
 
 const upload = multer({
@@ -29,20 +28,20 @@ app.post('/unlock', upload.single('file'), (req, res) => {
         return res.status(400).send('Arquivo e senha são necessários');
     }
 
-    const filePath = path.join(uploadDir, req.file.filename);
+    const filePath = join(uploadDir, req.file.filename);
     const password = req.body.data;
 
     console.log('Arquivo recebido:', req.file);
     console.log('Caminho do arquivo:', filePath);
 
-    fs.access(filePath, fs.constants.F_OK, (err) => {
+    access(filePath, constants.F_OK, (err) => {
         if (err) {
             console.error(`Arquivo não encontrado: ${filePath}`);
             return res.status(500).send('Arquivo não encontrado');
         }
 
-        const decryptedFilePath = path.join(uploadDir, 'decrypted.pdf');
-        const finalOutputPath = path.join(uploadDir, 'unlock.pdf');
+        const decryptedFilePath = join(uploadDir, 'decrypted.pdf');
+        const finalOutputPath = join(uploadDir, 'unlock.pdf');
 
         exec(`qpdf --decrypt --password=${password} ${filePath} ${decryptedFilePath}`, (err, stdout, stderr) => {
             if (err) {
@@ -56,13 +55,13 @@ app.post('/unlock', upload.single('file'), (req, res) => {
 
             console.log(`qpdf stdout: ${stdout}`);
 
-            fs.access(decryptedFilePath, fs.constants.F_OK, (err) => {
+            access(decryptedFilePath, constants.F_OK, (err) => {
                 if (err) {
                     console.error(`Arquivo descriptografado não encontrado: ${decryptedFilePath}`);
                     return res.status(500).send('Arquivo descriptografado não encontrado');
                 }
 
-                fs.rename(decryptedFilePath, finalOutputPath, (err) => {
+                rename(decryptedFilePath, finalOutputPath, (err) => {
                     if (err) {
                         console.error(`Erro ao salvar o PDF descriptografado: ${err}`);
                         return res.status(500).send('Falha ao salvar o PDF descriptografado');
@@ -73,15 +72,14 @@ app.post('/unlock', upload.single('file'), (req, res) => {
                             console.error(`Erro ao enviar o PDF: ${err}`);
                         }
 
-                        // Limpeza de arquivos temporários após um breve intervalo
                         setTimeout(() => {
-                            fs.unlink(filePath, (err) => {
+                            unlink(filePath, (err) => {
                                 if (err) console.error(`Erro ao remover o arquivo original: ${err}`);
                             });
-                            fs.unlink(finalOutputPath, (err) => {
+                            unlink(finalOutputPath, (err) => {
                                 if (err) console.error(`Erro ao remover o arquivo final: ${err}`);
                             });
-                        }, 1000); // 1 segundo para garantir que o download foi concluído
+                        }, 1000);
                     });
                 });
             });
@@ -90,7 +88,20 @@ app.post('/unlock', upload.single('file'), (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.send('API de desbloqueio de PDF');
+    res.send({
+        message: 'API de desbloqueio de PDF',
+        endpoints: {
+            unlock: {
+                method: 'POST',
+                url: '/unlock',
+                description: 'Desbloqueia um PDF criptografado',
+                parameters: {
+                    file: 'Arquivo PDF',
+                    data: 'Senha do arquivo PDF'
+                }
+            }
+        }
+    });
 });
 
 app.listen(port, () => {
