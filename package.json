@@ -2,6 +2,7 @@
 	"name": "pdf-api",
 	"version": "1.0.0",
 	"description": "API para descriptografar PDFs",
+	"type": "module",
 	"main": "./api/index.js",
 	"scripts": {
 		"start": "node index.js"
