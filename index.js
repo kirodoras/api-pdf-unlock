@@ -31,9 +31,6 @@ app.post('/unlock', upload.single('file'), (req, res) => {
     const filePath = join(uploadDir, req.file.filename);
     const password = req.body.data;
 
-    console.log('Arquivo recebido:', req.file);
-    console.log('Caminho do arquivo:', filePath);
-
     access(filePath, constants.F_OK, (err) => {
         if (err) {
             console.error(`Arquivo não encontrado: ${filePath}`);
@@ -52,8 +49,6 @@ app.post('/unlock', upload.single('file'), (req, res) => {
             if (stderr) {
                 console.error(`qpdf stderr: ${stderr}`);
             }
-
-            console.log(`qpdf stdout: ${stdout}`);
 
             access(decryptedFilePath, constants.F_OK, (err) => {
                 if (err) {
