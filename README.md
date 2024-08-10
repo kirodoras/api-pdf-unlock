@@ -2,10 +2,6 @@
 
 API Express para desbloquear arquivos PDF criptografados usando `qpdf`.
 
-## Funcionalidades
-
-- Desbloqueio de PDFs criptografados com senha.
-
 ## Tecnologias
 
 - Node.js
@@ -18,8 +14,8 @@ API Express para desbloquear arquivos PDF criptografados usando `qpdf`.
 1. Clone o repositório:
 
     ```bash
-    git clone <URL_DO_REPOSITÓRIO>
-    cd <NOME_DO_REPOSITÓRIO>
+    git clone git@github.com:kirodoras/api-pdf-unlock.git
+    cd /api-pdf-unlock
     ```
 
 2. Instale as dependências:
